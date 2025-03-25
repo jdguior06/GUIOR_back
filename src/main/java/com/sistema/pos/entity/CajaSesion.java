@@ -35,6 +35,8 @@ public class CajaSesion {
     private Double saldoInicial;
     
     private Double saldoFinal;
+    
+    private Double totalVentas;
 
     @ManyToOne
     @JoinColumn(name = "id_caja")

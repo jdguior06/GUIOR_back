@@ -1,5 +1,7 @@
 package com.sistema.pos.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.sistema.pos.entity.Venta;
 import com.sistema.pos.service.VentaService;
 import com.sistema.pos.util.EmailService;
+import com.sistema.pos.util.ReporteVentaService;
 import com.sistema.pos.util.VentaPDFService;
 
 @RestController
@@ -24,6 +27,9 @@ public class ControllerPDFPrueba {
 	
 	@Autowired 
 	private VentaService ventaService; 
+	
+	@Autowired 
+	private ReporteVentaService reporteVentaService;
 	
 	
 	@Autowired EmailService emailService;
@@ -49,6 +55,26 @@ public class ControllerPDFPrueba {
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al enviar correo: " + e.getMessage());
+        }
+    }
+    
+    @GetMapping("/excel")
+    public ResponseEntity<byte[]> generarEXCELPrueba() {
+        try {
+            // Obtener lista de ventas
+            List<Venta> ventas = ventaService.listarVentas();
+            byte[] excelBytes = reporteVentaService.generarReporteVentasExcel(ventas);
+
+            // Configurar headers para descargar el archivo
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "Reporte_Ventas.xlsx");
+
+            return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
+
+        } catch (Exception e) {
+        	e.printStackTrace(); 
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 

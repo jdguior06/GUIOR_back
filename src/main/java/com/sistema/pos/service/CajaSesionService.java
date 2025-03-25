@@ -56,7 +56,7 @@ public class CajaSesionService {
 		CajaSesion cajaSesion = cajaSesionRepository.findById(id)
 		        .orElseThrow(() -> new IllegalArgumentException("No se encontró la sesión de caja especificada."));
 		    
-		    if (!cajaSesion.getAbierta()) {
+		    if (cajaSesion.getAbierta()) {
 		        throw new IllegalStateException("La caja ya está cerrada.");
 		    }
 		return cajaSesion;
@@ -86,6 +86,7 @@ public class CajaSesionService {
 	    
 	    cajaSesion.setSaldoFinal(cajaSesion.getSaldoInicial() + totalVentas);
 	    cajaSesion.setFechaHoraCierre(LocalDateTime.now());
+	    cajaSesion.setTotalVentas(totalVentas);
 	    cajaSesion.setAbierta(false);
 
 	    return cajaSesionRepository.save(cajaSesion);

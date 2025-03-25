@@ -172,7 +172,8 @@ public class VentaController {
         List<Venta> ventas = ventaService.obtenerVentasPorFechas(startDate, endDate);
         Double total = ventaService.obtenerTotalVentasPorFechas(startDate, endDate);
 
-        byte[] excelFile = reporteVentaService.generarReporteVentasExcel(ventas, total);
+//        byte[] excelFile = reporteVentaService.generarReporteVentasExcel(ventas, total);
+        byte[] excelFile = reporteVentaService.generarReporteVentasExcel(ventas);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=reporte_ventas.xlsx")
