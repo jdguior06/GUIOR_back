@@ -2,6 +2,7 @@ package com.sistema.pos.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -25,12 +26,16 @@ import com.sistema.pos.entity.CajaSesion;
 import com.sistema.pos.entity.Venta;
 import com.sistema.pos.service.CajaSesionService;
 import com.sistema.pos.service.DetalleVentaService;
+import com.sistema.pos.service.VentaService;
 
 @Service
 public class ReporteVentaService {
 	
 	@Autowired
 	private DetalleVentaService detalleVentaService;
+	
+	@Autowired
+	private VentaService ventaService;
 	
 	@Autowired 
 	private CajaSesionService cajaSesionService;
@@ -84,7 +89,7 @@ public class ReporteVentaService {
 			titleCell.setCellValue("Reporte de Ventas");
 			titleCell.setCellStyle(titleStyle);
 
-			sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 3));
+			sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 4));
 
 			Row header = sheet.createRow(1);
 			String[] columns = { "ID", "Cliente", "Total", "Fecha Venta" };
@@ -194,7 +199,7 @@ public class ReporteVentaService {
 			titleCell.setCellValue("Reporte de Productos Vendidos por Sesion de Caja");
 			titleCell.setCellStyle(titleStyle);
 
-			sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 3));
+			sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 4));
 			
 			Row title1Row = sheet.createRow(2);
 			Cell title1Cell = title1Row.createCell(0);
@@ -297,7 +302,129 @@ public class ReporteVentaService {
 		}
 	}
 	
-	
-	
+	public byte[] generarReporteProductosVendidosPorFechaExcel(LocalDateTime fechaInicio, LocalDateTime fechaFin) throws IOException {
+		try (Workbook workbook = new XSSFWorkbook()) {
+			
+			List<ReporteProductoDTO> reportes = detalleVentaService.obtenerReporteProductosPorFecha(fechaInicio, fechaFin);
+			Double total = ventaService.obtenerTotalVentasPorFechas(fechaInicio, fechaFin);
+			
+			Sheet sheet = workbook.createSheet("Ventas_Productos_Fecha");
+
+			CellStyle titleStyle = workbook.createCellStyle();
+			Font titleFont = workbook.createFont();
+			titleFont.setBold(true);
+			titleFont.setFontHeightInPoints((short) 14);
+			titleStyle.setFont(titleFont);
+			titleStyle.setAlignment(HorizontalAlignment.CENTER);
+
+			CellStyle headerStyle = workbook.createCellStyle();
+			Font headerFont = workbook.createFont();
+			headerFont.setBold(true);
+			headerFont.setFontHeightInPoints((short) 12);
+			headerStyle.setFont(headerFont);
+			headerStyle.setAlignment(HorizontalAlignment.CENTER);
+			headerStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+			headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+			headerStyle.setBorderTop(BorderStyle.THIN);
+			headerStyle.setBorderBottom(BorderStyle.THIN);
+			headerStyle.setBorderLeft(BorderStyle.THIN);
+			headerStyle.setBorderRight(BorderStyle.THIN);
+
+			CellStyle borderedStyle = workbook.createCellStyle();
+			borderedStyle.setBorderTop(BorderStyle.THIN);
+			borderedStyle.setBorderBottom(BorderStyle.THIN);
+			borderedStyle.setBorderLeft(BorderStyle.THIN);
+			borderedStyle.setBorderRight(BorderStyle.THIN);
+
+			CellStyle currencyStyle = workbook.createCellStyle();
+			currencyStyle.setDataFormat(workbook.createDataFormat().getFormat("#,##0.00"));
+			currencyStyle.setBorderTop(BorderStyle.THIN);
+			currencyStyle.setBorderBottom(BorderStyle.THIN);
+			currencyStyle.setBorderLeft(BorderStyle.THIN);
+			currencyStyle.setBorderRight(BorderStyle.THIN);
+
+			CellStyle dateStyle = workbook.createCellStyle();
+			dateStyle.setDataFormat(workbook.createDataFormat().getFormat("dd/MM/yyyy HH:mm"));
+			dateStyle.setBorderTop(BorderStyle.THIN);
+			dateStyle.setBorderBottom(BorderStyle.THIN);
+			dateStyle.setBorderLeft(BorderStyle.THIN);
+			dateStyle.setBorderRight(BorderStyle.THIN);
+
+			Row titleRow = sheet.createRow(0);
+			Cell titleCell = titleRow.createCell(0);
+			titleCell.setCellValue("Reporte de Productos Vendidos por fecha");
+			titleCell.setCellStyle(titleStyle);
+
+			sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 4));
+			
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+			
+			Row title2Row = sheet.createRow(2);
+			Cell title3Cell = title2Row.createCell(0);
+			title3Cell.setCellValue("Fecha inicial: ");
+			title3Cell.setCellStyle(headerStyle);
+			Cell body3Cell = title2Row.createCell(1);
+			body3Cell.setCellValue(fechaInicio.format(formatter));
+			body3Cell.setCellStyle(dateStyle);
+			
+			Cell title4Cell = title2Row.createCell(3);
+			title4Cell.setCellValue("Fecha final: ");
+			title4Cell.setCellStyle(headerStyle);
+			Cell body4Cell = title2Row.createCell(4);
+			body4Cell.setCellValue(fechaFin.format(formatter));
+			body4Cell.setCellStyle(dateStyle);
+			
+
+			Row header = sheet.createRow(4);
+			String[] columns = { "ID", "Producto", "Cantidad Vendida", "Precio Unitario", "Subtotal" };
+			for (int i = 0; i < columns.length; i++) {
+				Cell cell = header.createCell(i);
+				cell.setCellValue(columns[i]);
+				cell.setCellStyle(headerStyle);
+			}
+
+			int rowIndex = 5;
+
+			for (ReporteProductoDTO reporte : reportes) {
+				Row row = sheet.createRow(rowIndex++);
+				Cell idCell = row.createCell(0);
+				idCell.setCellValue(reporte.getIdProducto());
+				idCell.setCellStyle(borderedStyle);
+
+				Cell productoCell = row.createCell(1);
+				productoCell.setCellValue(reporte.getNombreProducto());
+				productoCell.setCellStyle(borderedStyle);
+
+				Cell cantidadCell = row.createCell(2);
+				cantidadCell.setCellValue(reporte.getCantidadTotal());
+				cantidadCell.setCellStyle(borderedStyle);
+				
+				Cell precioCell = row.createCell(3);
+				precioCell.setCellValue(reporte.getPrecioUnitario());
+				precioCell.setCellStyle(currencyStyle);
+
+				Cell dateCell = row.createCell(4);
+				dateCell.setCellValue(reporte.getPrecioTotal());
+				dateCell.setCellStyle(currencyStyle);
+
+			}
+
+			Row totalRow = sheet.createRow(rowIndex);
+			Cell totalLabelCell = totalRow.createCell(3);
+			totalLabelCell.setCellValue("Total:");
+			totalLabelCell.setCellStyle(headerStyle);
+
+			Cell totalAmountCell = totalRow.createCell(4);
+			totalAmountCell.setCellValue(total);
+			totalAmountCell.setCellStyle(currencyStyle);
+
+			for (int i = 0; i < columns.length; i++) {
+				sheet.autoSizeColumn(i);
+			}
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			workbook.write(out);
+			return out.toByteArray();
+		}
+	}
 	
 }

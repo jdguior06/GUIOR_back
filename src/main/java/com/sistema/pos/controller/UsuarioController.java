@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.sistema.pos.dto.ActualizarContraseñaDTO;
 import com.sistema.pos.dto.ThemeColorRequest;
 import com.sistema.pos.dto.UsuarioDTO;
 import com.sistema.pos.entity.Usuario;
@@ -120,6 +121,42 @@ public class UsuarioController {
 		}
 		try {
 			Usuario usuarioActualizado = service.updateUser(id, userDTO);
+			return new ResponseEntity<>(
+					ApiResponse.<Usuario>builder()
+							.statusCode(HttpStatus.OK.value())
+							.message(HttpStatusMessage.getMessage(HttpStatus.OK))
+							.data(usuarioActualizado)
+							.build(),
+					HttpStatus.OK
+			);
+		} catch (ResponseStatusException e) {
+			return new ResponseEntity<>(
+					ApiResponse.<Usuario>builder()
+							.statusCode(e.getStatusCode().value())
+							.message(e.getReason())
+							.build(),
+					e.getStatusCode()
+			);
+		}
+	}
+	
+	@PreAuthorize("isAuthenticated()")
+	@PatchMapping("/cambiar-contraseña")
+	public ResponseEntity<ApiResponse<Usuario>>actualizarContraseña(Authentication authentication, @Valid @RequestBody 
+			ActualizarContraseñaDTO contraseñaDTO, BindingResult bindingResult) {
+		if (bindingResult.hasErrors()) {
+			List<String> errors = bindingResult.getAllErrors().stream()
+					.map(DefaultMessageSourceResolvable::getDefaultMessage)
+					.collect(Collectors.toList());
+			return new ResponseEntity<>(
+					ApiResponse.<Usuario>builder()
+							.errors(errors)
+							.build(),
+					HttpStatus.BAD_REQUEST
+			);
+		}
+		try {
+			Usuario usuarioActualizado = service.actualizarContraseña(authentication, contraseñaDTO);
 			return new ResponseEntity<>(
 					ApiResponse.<Usuario>builder()
 							.statusCode(HttpStatus.OK.value())

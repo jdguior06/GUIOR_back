@@ -1,5 +1,6 @@
 package com.sistema.pos.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,5 +18,11 @@ public class DetalleVentaService {
 	public List<ReporteProductoDTO> obtenerReporteProductosPorCajaSesion(Long cajaSesionId) {
         return detalleVentaRepository.obtenerReportePorCajaSesion(cajaSesionId);
     }
+	
+	public List<ReporteProductoDTO> obtenerReporteProductosPorFecha(LocalDateTime fechaInicio, LocalDateTime fechaFin) {
+		return detalleVentaRepository.obtenerReportePorFecha(fechaInicio, fechaFin);
+	}
+	
+	
 
 }

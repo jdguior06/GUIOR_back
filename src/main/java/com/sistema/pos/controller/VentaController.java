@@ -100,7 +100,6 @@ public class VentaController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<Venta>> realizarVenta(@Valid @RequestBody VentaDTO ventaDTO, BindingResult bindingResult) {
-        // Validación de errores de campos
         if (bindingResult.hasErrors()) {
             List<String> errors = bindingResult.getAllErrors().stream()
                     .map(DefaultMessageSourceResolvable::getDefaultMessage)
@@ -115,7 +114,6 @@ public class VentaController {
             );
         }
 
-        // Validaciones de negocio
         if (ventaDTO.getDetalleVentaDTOS() == null || ventaDTO.getDetalleVentaDTOS().isEmpty()) {
             return new ResponseEntity<>(
                     ApiResponse.<Venta>builder()
@@ -170,11 +168,8 @@ public class VentaController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) throws IOException {
         List<Venta> ventas = ventaService.obtenerVentasPorFechas(startDate, endDate);
-        Double total = ventaService.obtenerTotalVentasPorFechas(startDate, endDate);
-
-//        byte[] excelFile = reporteVentaService.generarReporteVentasExcel(ventas, total);
         byte[] excelFile = reporteVentaService.generarReporteVentasExcel(ventas);
-
+        
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=reporte_ventas.xlsx")
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)

@@ -56,11 +56,12 @@ public class CajaSesionService {
 		CajaSesion cajaSesion = cajaSesionRepository.findById(id)
 		        .orElseThrow(() -> new IllegalArgumentException("No se encontró la sesión de caja especificada."));
 		    
-		    if (cajaSesion.getAbierta()) {
-		        throw new IllegalStateException("La caja ya está cerrada.");
-		    }
+//		    if (!cajaSesion.getAbierta()) {
+//		        throw new IllegalStateException("La caja ya está cerrada.");
+//		    }
 		return cajaSesion;
 	}
+	
 	
     public Optional<CajaSesion> obtenerSesionAbiertaPorCaja(Long idCaja) {
         return cajaSesionRepository.findByCajaIdAndAbiertaTrue(idCaja);

@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -17,9 +18,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.sistema.pos.config.JwtService;
 import com.sistema.pos.config.LoggableAction;
+import com.sistema.pos.dto.ActualizarContraseñaDTO;
 import com.sistema.pos.dto.UsuarioDTO;
 import com.sistema.pos.entity.Rol;
 import com.sistema.pos.entity.Usuario;
@@ -27,7 +30,9 @@ import com.sistema.pos.repository.RolRepository;
 import com.sistema.pos.repository.UsuarioRepository;
 import com.sistema.pos.response.AuthResponse;
 import com.sistema.pos.response.LoginRequest;
+import com.sistema.pos.util.EmailService;
 
+import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -53,6 +58,9 @@ public class UsuarioService {
 	
 	@Autowired
 	private RolService rolService;
+	
+	@Autowired
+	private EmailService emailService;
 	
 	@Autowired
 	private UsuarioDetailsService usuarioDetailsService;
@@ -97,14 +105,65 @@ public class UsuarioService {
 	
 	@LoggableAction
 	public Usuario registrarUser(UsuarioDTO userDto) {
-//		List<Rol> roles  = rolService.listarRoles();
-		Rol roles = rolService.obtenerRol(userDto.getRolId());
-		Set<Rol> rolesSet = new HashSet<>();
-	    rolesSet.add(roles);
-		Usuario usuario = new Usuario(userDto.getNombre(), 
-				userDto.getApellido(), userDto.getEmail(), 
-				passwordEncoder.encode(userDto.getPassword()), rolesSet);
-		return usuarioRepository.save(usuario);
+		try {
+			Rol roles = rolService.obtenerRol(userDto.getRolId());
+			Set<Rol> rolesSet = new HashSet<>();
+		    rolesSet.add(roles);
+		    
+		    String password = userDto.getPassword();		    
+		    
+		    if (password == null || password.trim().isEmpty()) {
+		        throw new RuntimeException("Error: La contraseña generada es inválida.");
+		    }
+		    
+		    String passwordEncriptada = passwordEncoder.encode(password);
+		    
+			Usuario usuario = new Usuario(userDto.getNombre(), 
+					userDto.getApellido(), userDto.getEmail(), 
+					passwordEncriptada, rolesSet);
+			usuario = usuarioRepository.save(usuario);
+
+			try {
+				emailService.enviarCorreoBienvenida(usuario.getEmail(), usuario.getNombre(), password);
+			} catch (MessagingException e) {
+				throw new RuntimeException("Error al enviar el correo.");
+			}
+			return usuario;
+			
+		} catch (Exception e) {
+			 throw new RuntimeException("Error al registrar el usuario.");
+		}
+		
+	}
+	
+	public Usuario actualizarContraseña(Authentication authentication, ActualizarContraseñaDTO contraseñaDTO) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Usuario user = usuarioDetailsService.getUser(userDetails.getUsername());
+		
+		if (!passwordEncoder.matches(contraseñaDTO.getContraseñaActual(), user.getPassword())) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La contraseña es incorrecta.");
+		}
+		
+		if (!contraseñaDTO.getNuevaContraseña().equals(contraseñaDTO.getConfirmarContraseña())) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Las nuevas contraseñas no coinciden.");
+		}
+
+		if (passwordEncoder.matches(contraseñaDTO.getNuevaContraseña(), user.getPassword())) {
+	        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La nueva contraseña no puede ser igual a la anterior.");
+	    }
+		
+		String passwordEncriptada = passwordEncoder.encode(contraseñaDTO.getNuevaContraseña());
+		user.setPassword(passwordEncriptada);
+		
+		user =  usuarioRepository.save(user);
+		
+		try {
+			emailService.enviarCorreoCambioContrasena(user.getEmail(), user.getNombre());
+		} catch (MessagingException e) {
+			throw new RuntimeException("Error al enviar el correo.");
+		}
+		
+		return user;
 	}
 	
 	public AuthResponse createUserAdmin(UsuarioDTO userDto) {
