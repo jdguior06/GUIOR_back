@@ -43,6 +43,7 @@ public class VentaController {
 	@Autowired
 	private ReporteVentaService reporteVentaService;
 
+	// get
     @GetMapping
     public ResponseEntity<ApiResponse<List<Venta>>> listarVentas() {
         List<Venta> ventas = ventaService.listarVentas();
