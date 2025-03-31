@@ -2,7 +2,6 @@ package com.sistema.pos.util;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -42,13 +41,11 @@ public class EmailService {
             "        .container { background: white; padding: 20px; border-radius: 10px; box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1); }" +
             "        h3 { color: #8B0000; }" +
             "        .credentials { background: #eee; padding: 10px; border-radius: 5px; text-align: left; display: inline-block; }" +
-            "        img { width: 150px; margin: 10px 0; }" +
             "        .footer { font-size: 12px; color: #555; margin-top: 20px; }" +
             "    </style>" +
             "</head>" +
             "<body>" +
             "    <div class='container'>" +
-            "        <img src='cid:logoImage' alt='Logo de Cafetería PAYEJALI'/>" +
             "        <h3>¡Hola, " + nombre + "!</h3>" +
             "        <p>Es un placer darte la bienvenida a <b>Cafetería PAYEJALI</b>. Nos alegra que formes parte de nuestra comunidad.</p>" +
             "        <p>Tu cuenta ha sido creada exitosamente y ahora tienes acceso a nuestra plataforma de gestión.</p>" +
@@ -70,9 +67,6 @@ public class EmailService {
 
         helper.setText(contenidoHtml, true);
 
-        ClassPathResource logo = new ClassPathResource("logo.png");
-        helper.addInline("logoImage", logo);
-
         mailSender.send(mensaje);
     }
 
@@ -91,13 +85,11 @@ public class EmailService {
             "        .container { background: white; padding: 20px; border-radius: 10px; box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1); }" +
             "        h3 { color: #8B0000; }" +
             "        p { color: #333; font-size: 16px; }" +
-            "        img { width: 150px; margin: 10px 0; }" +
             "        .footer { font-size: 12px; color: #555; margin-top: 20px; }" +
             "    </style>" +
             "</head>" +
             "<body>" +
             "    <div class='container'>" +
-            "        <img src='cid:logoImage' alt='Logo de Cafetería PAYEJALI'/>" +
             "        <h3>¡Hola, " + nombre + "!</h3>" +
             "        <p>Queremos informarte que tu contraseña ha sido cambiada exitosamente.</p>" +
             "        <p>Si no realizaste este cambio, por favor contacta de inmediato a nuestro equipo de soporte.</p>" +
@@ -113,9 +105,6 @@ public class EmailService {
             "</html>";
 
         helper.setText(contenidoHtml, true);
-
-        ClassPathResource logo = new ClassPathResource("logo.png");
-        helper.addInline("logoImage", logo);
 
         mailSender.send(mensaje);
     }
