@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ActualizarContraseñaDTO {
+public class ActualizarContrasenaDTO {
 	
 	@NotBlank(message = "La contraseña actual no puede estar vacía")
     private String contraseñaActual;

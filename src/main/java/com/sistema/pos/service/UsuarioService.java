@@ -22,7 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.sistema.pos.config.JwtService;
 import com.sistema.pos.config.LoggableAction;
-import com.sistema.pos.dto.ActualizarContraseñaDTO;
+import com.sistema.pos.dto.ActualizarContrasenaDTO;
 import com.sistema.pos.dto.UsuarioDTO;
 import com.sistema.pos.entity.Rol;
 import com.sistema.pos.entity.Usuario;
@@ -136,7 +136,7 @@ public class UsuarioService {
 		
 	}
 	
-	public Usuario actualizarContraseña(Authentication authentication, ActualizarContraseñaDTO contraseñaDTO) {
+	public Usuario actualizarContraseña(Authentication authentication, ActualizarContrasenaDTO contraseñaDTO) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Usuario user = usuarioDetailsService.getUser(userDetails.getUsername());
 		

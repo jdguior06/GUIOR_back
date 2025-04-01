@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.sistema.pos.dto.ActualizarContraseñaDTO;
+import com.sistema.pos.dto.ActualizarContrasenaDTO;
 import com.sistema.pos.dto.ThemeColorRequest;
 import com.sistema.pos.dto.UsuarioDTO;
 import com.sistema.pos.entity.Usuario;
@@ -143,7 +143,7 @@ public class UsuarioController {
 	@PreAuthorize("isAuthenticated()")
 	@PatchMapping("/cambiar-contraseña")
 	public ResponseEntity<ApiResponse<Usuario>>actualizarContraseña(Authentication authentication, @Valid @RequestBody 
-			ActualizarContraseñaDTO contraseñaDTO, BindingResult bindingResult) {
+			ActualizarContrasenaDTO contraseñaDTO, BindingResult bindingResult) {
 		if (bindingResult.hasErrors()) {
 			List<String> errors = bindingResult.getAllErrors().stream()
 					.map(DefaultMessageSourceResolvable::getDefaultMessage)
