@@ -20,7 +20,7 @@ public class ProductoAlmacen {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
-    private int stock;
+    private Integer stock;
 
     @ManyToOne
     @JoinColumn(name = "almacen_id")

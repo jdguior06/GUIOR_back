@@ -56,6 +56,11 @@ public class ProductoAlmacenService {
         }
         return productosAlmacenDTOList;
     }
+    
+    public List<ProductoAlmacen> listarInventarioDeAlmacen(Long idAlmacen) {    
+        List<ProductoAlmacen> productosAlmacen = productoAlmacenRepository.findByAlmacen_IdAndActivoTrue(idAlmacen);
+        return productosAlmacen;
+    }
 
     public boolean existe(Long id_almacen, Long id_producto){
         Long cantidad = productoAlmacenRepository.verificarProducto(id_almacen,id_producto);
@@ -122,6 +127,12 @@ public class ProductoAlmacenService {
     
     public void actualizarStock(ProductoAlmacen productoAlmacen) {
     	productoAlmacenRepository.save(productoAlmacen);
+    }
+    
+    public ProductoAlmacen ajustarStock(Long id, Integer cantidad) {
+    	ProductoAlmacen productoAlmacen = obtener(id);
+    	productoAlmacen.setStock(cantidad);
+    	return productoAlmacenRepository.save(productoAlmacen);
     }
     
     public List<ProductoConsolidadoDTO> listarProductosConsolidadoPorSucursal(Long idSucursal) {

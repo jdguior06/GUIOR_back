@@ -6,6 +6,8 @@ import java.util.List;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -33,7 +35,7 @@ public class Venta {
     
     private Double total;
 
-    @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DetalleVenta> detalleVentaList;
     
     private LocalDateTime fechaVenta;
@@ -45,9 +47,15 @@ public class Venta {
     @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL)
     private List<MetodoPago> metodosPago;
 
+    @Enumerated(EnumType.STRING)
+    private EstadoVenta estado;
+    
     @PrePersist
     public void prePersist() {
     	fechaVenta = LocalDateTime.now(ZoneId.of("America/La_Paz"));
+    	if (estado == null) {
+            estado = EstadoVenta.PENDIENTE;
+        }
     }
 
 }
