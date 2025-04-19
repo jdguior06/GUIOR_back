@@ -13,6 +13,7 @@ import com.sistema.pos.config.LoggableAction;
 import com.sistema.pos.dto.CajaSesionDTO;
 import com.sistema.pos.entity.Caja;
 import com.sistema.pos.entity.CajaSesion;
+import com.sistema.pos.entity.EstadoVenta;
 import com.sistema.pos.entity.Usuario;
 import com.sistema.pos.entity.Venta;
 import com.sistema.pos.repository.CajaSesionRepository;
@@ -56,9 +57,7 @@ public class CajaSesionService {
 		CajaSesion cajaSesion = cajaSesionRepository.findById(id)
 		        .orElseThrow(() -> new IllegalArgumentException("No se encontró la sesión de caja especificada."));
 		    
-//		    if (!cajaSesion.getAbierta()) {
-//		        throw new IllegalStateException("La caja ya está cerrada.");
-//		    }
+
 		return cajaSesion;
 	}
 	
@@ -82,6 +81,7 @@ public class CajaSesionService {
 	    CajaSesion cajaSesion = obtenerCajaSesion(cajaSesionId);
 	    
 	    Double totalVentas = cajaSesion.getVentas().stream()
+	    	.filter(venta -> venta.getEstado() == EstadoVenta.PAGADA)
 	        .mapToDouble(Venta::getTotal)
 	        .sum();
 	    

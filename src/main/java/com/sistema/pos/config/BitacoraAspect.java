@@ -68,7 +68,10 @@ public class BitacoraAspect {
 	}
 	
 	private String obtenerInformacionDispositivo() {
-        return request.getHeader("User-Agent");
+		String userAgent = request.getHeader("User-Agent");
+	    return userAgent != null && userAgent.length() > 128 
+	           ? userAgent.substring(0, 128) 
+	           : userAgent;
     }
 
 	private String getClientIp() {

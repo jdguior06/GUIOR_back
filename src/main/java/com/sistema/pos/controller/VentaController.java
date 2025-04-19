@@ -203,11 +203,28 @@ public class VentaController {
 	@PatchMapping("/pedido/cancelar/{id}")
 	public ResponseEntity<ApiResponse<Venta>> cancelarPedido(@PathVariable Long id) {
 		try {
-			ventaService.cancelarPedido(id);
+			System.out.println("Cancelando pedido con ID: " + id);
+			Venta venta = ventaService.cancelarPedido(id);
 			return new ResponseEntity<>(
-					ApiResponse.<Venta>builder().statusCode(HttpStatus.NO_CONTENT.value())
-							.message(HttpStatusMessage.getMessage(HttpStatus.NO_CONTENT)).build(),
-					HttpStatus.NO_CONTENT);
+					ApiResponse.<Venta>builder().statusCode(HttpStatus.OK.value())
+							.message(HttpStatusMessage.getMessage(HttpStatus.OK)).data(venta).build(),
+					HttpStatus.OK);
+
+		} catch (ResponseStatusException e) {
+			return new ResponseEntity<>(
+					ApiResponse.<Venta>builder().statusCode(e.getStatusCode().value()).message(e.getReason()).build(),
+					e.getStatusCode());
+		}
+	}
+	
+	@PatchMapping("/pedido/completar/{id}")
+	public ResponseEntity<ApiResponse<Venta>> completarPedido(@PathVariable Long id) {
+		try {
+			Venta venta = ventaService.cancelarPedido(id);
+			return new ResponseEntity<>(
+					ApiResponse.<Venta>builder().statusCode(HttpStatus.OK.value())
+							.message(HttpStatusMessage.getMessage(HttpStatus.OK)).data(venta).build(),
+					HttpStatus.OK);
 
 		} catch (ResponseStatusException e) {
 			return new ResponseEntity<>(

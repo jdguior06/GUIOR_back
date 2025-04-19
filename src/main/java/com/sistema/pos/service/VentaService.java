@@ -63,7 +63,7 @@ public class VentaService {
 
 	@Transactional
 	public List<Venta> listarVentas() {
-		return ventaRepository.findAll();
+		return ventaRepository.listarVentasPagadas();
 	}
 	
 	public Double obtenerTotalVentasPorFechas(LocalDateTime startDate, LocalDateTime endDate) {
@@ -253,8 +253,8 @@ public class VentaService {
 	@LoggableAction
 	public Venta pagarPedido(Long idVenta, List<MetodoPagoDTO> metodoPagoDTO) {
 		Venta venta = obtenerVenta(idVenta);
-		if (venta.getEstado() != EstadoVenta.PENDIENTE) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Solo se pueden pagar ventas pendientes");
+		if (venta.getEstado() != EstadoVenta.PENDIENTE && venta.getEstado() != EstadoVenta.COMPLETADA) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Solo se pueden pagar ventas pendientes o completadas");
 			
 		}
 		
@@ -353,7 +353,7 @@ public class VentaService {
 	public Venta actualizarPedido(Long idVenta, VentaDTO ventaDTO) {
 		Venta venta = obtenerVenta(idVenta);
 		
-		if (venta.getEstado() != EstadoVenta.PENDIENTE) {
+		if (venta.getEstado() != EstadoVenta.PENDIENTE && venta.getEstado() != EstadoVenta.COMPLETADA) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Solo se pueden editar pedidos pendientes");
 			
 		}
@@ -388,10 +388,24 @@ public class VentaService {
 		Venta venta = obtenerVenta(idVenta);
 		
 		if (venta.getEstado() != EstadoVenta.PENDIENTE) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Solo se pueden cancelar los pedidos pendientes o completados");
+		}
+		
+		venta.setEstado(EstadoVenta.CANCELADA);
+		
+		return ventaRepository.save(venta);
+	}
+	
+	@Transactional
+	@LoggableAction
+	public Venta completarPedido(Long idVenta) {
+		Venta venta = obtenerVenta(idVenta);
+		
+		if (venta.getEstado() != EstadoVenta.PENDIENTE) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Solo se pueden cancelar los pedidos pendientes");
 		}
 		
-		venta.setEstado(EstadoVenta.ANULADA);
+		venta.setEstado(EstadoVenta.COMPLETADA);
 		
 		return ventaRepository.save(venta);
 	}

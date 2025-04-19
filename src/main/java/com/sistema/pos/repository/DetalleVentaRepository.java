@@ -19,7 +19,7 @@ public interface DetalleVentaRepository extends JpaRepository<DetalleVenta, Long
 	           "d.producto.id, d.producto.nombre, SUM(d.cantidad),  d.producto.precioVenta, SUM(d.monto)) " +
 	           "FROM DetalleVenta d " +
 	           "JOIN d.venta v " +
-	           "WHERE v.cajaSesion.id = :cajaSesionId " +
+	           "WHERE v.cajaSesion.id = :cajaSesionId AND v.estado = 'PAGADA'" +
 	           "GROUP BY d.producto.id, d.producto.nombre, d.producto.precioVenta " +
 	           "ORDER BY SUM(d.cantidad) DESC")
 	 List<ReporteProductoDTO> obtenerReportePorCajaSesion(@Param("cajaSesionId") Long cajaSesionId);
@@ -28,7 +28,7 @@ public interface DetalleVentaRepository extends JpaRepository<DetalleVenta, Long
 	           "d.producto.id, d.producto.nombre, SUM(d.cantidad),  d.producto.precioVenta, SUM(d.monto)) " +
 	           "FROM DetalleVenta d " +
 	           "JOIN d.venta v " +
-	           "WHERE v.fechaVenta BETWEEN :startDate AND :endDate " +
+	           "WHERE v.fechaVenta BETWEEN :startDate AND :endDate AND v.estado = 'PAGADA'" +
 	           "GROUP BY d.producto.id, d.producto.nombre, d.producto.precioVenta " +
 	           "ORDER BY SUM(d.cantidad) DESC")
 	 List<ReporteProductoDTO> obtenerReportePorFecha(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);

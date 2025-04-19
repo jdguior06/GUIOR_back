@@ -13,15 +13,18 @@ import com.sistema.pos.entity.Venta;
 @Repository
 public interface VentaRepository extends JpaRepository<Venta, Long>{
 	
-	@Query("SELECT SUM(v.total) FROM Venta v WHERE v.fechaVenta BETWEEN :startDate AND :endDate")
+	@Query("SELECT SUM(v.total) FROM Venta v WHERE v.fechaVenta BETWEEN :startDate AND :endDate AND v.estado = 'PAGADA'")
 	Double sumTotalVentasByFechaVentaBetween(@Param("startDate") LocalDateTime startDate,
 	                                         @Param("endDate") LocalDateTime endDate);
 	
-	@Query("SELECT v FROM Venta v WHERE v.fechaVenta BETWEEN :startDate AND :endDate")
+	@Query("SELECT v FROM Venta v WHERE v.fechaVenta BETWEEN :startDate AND :endDate AND v.estado = 'PAGADA'")
     List<Venta> findVentasByFechaVentaBetween(@Param("startDate") LocalDateTime startDate,
                                               @Param("endDate") LocalDateTime endDate);
 	
 	@Query("SELECT v FROM Venta v WHERE v.cajaSesion.id = :id")
 	List<Venta> findVentasByCajaSesion(@Param("id") Long id);
+	
+	@Query("SELECT v FROM Venta v WHERE v.estado = 'PAGADA'")
+	List<Venta> listarVentasPagadas();
 
 }
